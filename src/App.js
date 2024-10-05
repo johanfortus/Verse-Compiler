@@ -17,22 +17,33 @@ function App() {
     return (
         <div>
             <h1>Verse Playground</h1>
-            <Editor
-                height="500px"
-                width="800px"
-                defaultLanguage="javascript"
-                value={code}
-                onChange={handleEditorChange}
-                theme="vs-dark"
-            />
-            <button onClick={runCode}>Run Code</button>
+            <div style={{ display: 'flex' }}>
+                
+                <div style={{ display:'flex', flexDirection:'column', width:'50%'}}>
+                    <h2 style={{ margin:"0" }} >&lt;/&gt; Code: </h2>
+                    <Editor
+                        height="500px"
+                        defaultLanguage="javascript"
+                        value={code}
+                        onChange={handleEditorChange}
+                        theme="vs-dark"
+                    />
+                </div>
+                
+                
+                {/* Output Area */}
+                <div style={{ display:"flex", flexDirection: "column", width: '50%'}}>
 
-            <div style={{ marginTop: '20px', border: '1px solid #ddd', padding: '10px', width: '800px', height: '200px', overflowY: 'scroll', backgroundColor: '#f9f9f9'}}>
-                <h2>Output:</h2>
-                <pre>{output}</pre>
+                    <h2 style={{ margin:"0" }}>Output: </h2>
+                
+                    <div style={{ border: '1px solid #ddd', height: '500px', overflowY: 'scroll', backgroundColor: '#f9f9f9'}}>
+                        <pre>{output}</pre>
+                    </div>
+
+                </div>
 
             </div>
-
+            <button onClick={runCode}>Run Code</button>
         </div>
     );
 
