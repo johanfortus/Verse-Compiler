@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
-import verseParser from './verse-parser';
+import * as verseParser from './verse-parser';
+import { VerseInterpreter } from './verse-interpreter';
+
 
 function App() {
     const [code, setCode] = useState('// Write your Verse code here');
     const [output, setOutput] = useState('');
+    const [astOutput, setAstOutput] = useState('');
+    const interpreter = new VerseInterpreter();
 
     const handleEditorChange = (value) => {
         setCode(value);
@@ -12,8 +16,12 @@ function App() {
 
     const runCode = () => {
         try {
-            const result = verseParser.parse(code);
-            setOutput(JSON.stringify(result, null, 2));
+            const ast = verseParser.parse(code);
+            console.log('Parsed AST:', ast);
+            setAstOutput(JSON.stringify(ast, null, 2));
+            
+            const result = interpreter.interpret(ast);
+            setOutput(result);
         }
         catch(e){
             setOutput(`Parse error: ${e.message}`);
@@ -34,7 +42,7 @@ function App() {
                     <h2 style={{ margin:"0" }} >&lt;/&gt; Code: </h2>
                     <Editor
                         height="500px"
-                        defaultLanguage="javascript"
+                        defaultLanguage="verse"
                         value={code}
                         onChange={handleEditorChange}
                         theme="vs-dark"

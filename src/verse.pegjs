@@ -1,158 +1,77 @@
-// verse.pegjs
+{
+  function Program(body) { return { type: "Program", body: body }; }
+  function VariableDeclaration(name, varType, value) { return { type: "VariableDeclaration", name: name, varType: varType, value: value }; }
+  function SetStatement(name, value) { return { type: "SetStatement", name: name, value: value }; }
+  function PrintStatement(value) { return { type: "PrintStatement", value: value }; }
+  function InterpolatedString(parts) { return { type: "InterpolatedString", parts: parts }; }
+  function TextPart(text) { return { type: "TextPart", text: text }; }
+  function InterpolatedExpression(expression) { return { type: "InterpolatedExpression", expression: expression }; }
+  function StringLiteral(value) { return { type: "StringLiteral", value: value }; }
+  function IntegerLiteral(value) { return { type: "IntegerLiteral", value: parseInt(value, 10) }; }
+  function FloatLiteral(value) { return { type: "FloatLiteral", value: parseFloat(value) }; }
+  function Identifier(name) { return { type: "Identifier", name: name }; }
+  function Type(name) { return { type: "Type", name: name }; }
+}
 
 Start
   = Program
 
 Program
-  = _ statements:Statement* _ {
-    return statements;
-  }
+  = statements:Statement* { return Program(statements); }
 
 Statement
-  = PrintStatement
-  / VariableDeclaration
-  / Assignment
-  / ExpressionStatement
-  / IfStatement
-  / ForStatement
-  / ReturnStatement
-  / FunctionDeclaration
-
-PrintStatement
-  = "Print" _ "(" _ value:Expression _ ")" _ ";"? _ {
-    return { type: "PrintStatement", value };
-  }
+  = VariableDeclaration
+  / SetStatement
+  / PrintStatement
 
 VariableDeclaration
-  = ("var" / "let") _ name:Identifier _ (":" _ type:Type)? (_ "=" _ value:Expression)? _ ";"? _ {
-    return { type: "VariableDeclaration", name, type, value };
-  }
+  = "var" _ name:Identifier _ ":" _ varType:Type _ "=" _ value:Expression _ {
+      return VariableDeclaration(name, varType, value);
+    }
 
-Assignment
-  = left:Identifier _ "=" _ right:Expression _ ";"? _ {
-    return { type: "Assignment", left, right };
-  }
+SetStatement
+  = "set" _ name:Identifier _ "=" _ value:Expression _ {
+      return SetStatement(name, value);
+    }
 
-ExpressionStatement
-  = expr:Expression _ ";"? _ {
-    return { type: "ExpressionStatement", expression: expr };
-  }
+PrintStatement
+  = "Print" _ "(" _ value:InterpolatedString _ ")" _ {
+      return PrintStatement(value);
+    }
 
-IfStatement
-  = "if" _ condition:ParenthesizedExpression _ thenBlock:Block elseBlock:(_ "else" _ Block)? {
-    return { type: "IfStatement", condition, thenBlock, elseBlock: elseBlock ? elseBlock[3] : null };
-  }
+InterpolatedString
+  = '"' parts:InterpolatedPart* '"' { return InterpolatedString(parts); }
 
-ForStatement
-  = "for" _ "(" _ init:Statement? _ ";" _ condition:Expression? _ ";" _ update:Expression? _ ")" _ body:Block {
-    return { type: "ForStatement", init, condition, update, body };
-  }
+InterpolatedPart
+  = TextPart
+  / InterpolatedExpression
 
-ReturnStatement
-  = "return" _ value:Expression? _ ";"? _ {
-    return { type: "ReturnStatement", value };
-  }
+TextPart
+  = text:$[^"{]+ { return TextPart(text); }
 
-FunctionDeclaration
-  = "function" _ name:Identifier _ params:ParameterList _ (":" _ returnType:Type)? _ body:Block {
-    return { type: "FunctionDeclaration", name, params, returnType, body };
-  }
-
-Block
-  = "{" _ statements:Statement* _ "}" _ {
-    return statements;
-  }
-
-ParameterList
-  = "(" _ params:(Parameter (_ "," _ Parameter)*)? _ ")" {
-    return params ? [params[0]].concat(params[1].map(p => p[3])) : [];
-  }
-
-Parameter
-  = name:Identifier _ ":" _ type:Type {
-    return { name, type };
-  }
+InterpolatedExpression
+  = "{" _ expr:Expression _ "}" { return InterpolatedExpression(expr); }
 
 Expression
-  = LogicalExpression
-
-LogicalExpression
-  = left:ComparisonExpression _ op:LogicalOperator _ right:LogicalExpression { return { type: "BinaryExpression", operator: op, left, right }; }
-  / ComparisonExpression
-
-ComparisonExpression
-  = left:AdditiveExpression _ op:ComparisonOperator _ right:ComparisonExpression { return { type: "BinaryExpression", operator: op, left, right }; }
-  / AdditiveExpression
-
-AdditiveExpression
-  = left:MultiplicativeExpression _ op:AdditiveOperator _ right:AdditiveExpression { return { type: "BinaryExpression", operator: op, left, right }; }
-  / MultiplicativeExpression
-
-MultiplicativeExpression
-  = left:UnaryExpression _ op:MultiplicativeOperator _ right:MultiplicativeExpression { return { type: "BinaryExpression", operator: op, left, right }; }
-  / UnaryExpression
-
-UnaryExpression
-  = op:UnaryOperator _ expr:UnaryExpression { return { type: "UnaryExpression", operator: op, expression: expr }; }
-  / PrimaryExpression
-
-PrimaryExpression
-  = Literal
-  / Identifier
-  / FunctionCall
-  / ParenthesizedExpression
-
-ParenthesizedExpression
-  = "(" _ expr:Expression _ ")" { return expr; }
-
-FunctionCall
-  = callee:Identifier _ "(" _ args:ArgumentList? _ ")" {
-    return { type: "FunctionCall", callee, arguments: args || [] };
-  }
-
-ArgumentList
-  = arg:Expression rest:(_ "," _ Expression)* {
-    return [arg].concat(rest.map(r => r[3]));
-  }
-
-Literal
   = StringLiteral
-  / NumberLiteral
-  / BooleanLiteral
+  / FloatLiteral
+  / IntegerLiteral
+  / Identifier
 
 StringLiteral
-  = '"' value:[^"]* '"' { return { type: "StringLiteral", value: value.join('') }; }
+  = '"' value:$[^"]* '"' { return StringLiteral(value); }
 
-NumberLiteral
-  = value:$([0-9]+ ("." [0-9]+)?) { return { type: "NumberLiteral", value: parseFloat(value) }; }
+IntegerLiteral
+  = value:$[-+]?[0-9]+ { return IntegerLiteral(value); }
 
-BooleanLiteral
-  = value:("true" / "false") { return { type: "BooleanLiteral", value: value === "true" }; }
+FloatLiteral
+  = value:$[-+]?[0-9]+"."[0-9]+ { return FloatLiteral(value); }
 
 Identifier
-  = name:$([a-zA-Z_][a-zA-Z0-9_]*) { return { type: "Identifier", name }; }
+  = name:$[a-zA-Z_][a-zA-Z0-9_]* { return Identifier(name); }
 
 Type
-  = name:$([a-zA-Z_][a-zA-Z0-9_]*) { return { type: "Type", name }; }
-
-LogicalOperator
-  = "&&" / "||"
-
-ComparisonOperator
-  = "==" / "!=" / "<=" / ">=" / "<" / ">"
-
-AdditiveOperator
-  = "+" / "-"
-
-MultiplicativeOperator
-  = "*" / "/" / "%"
-
-UnaryOperator
-  = "!" / "-"
+  = name:$("string" / "int" / "float") { return Type(name); }
 
 _ "whitespace"
   = [ \t\n\r]*
-
-// Optional semicolon
-_$ "optionalSemicolon"
-  = ";"? _
