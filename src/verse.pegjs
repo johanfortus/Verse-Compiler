@@ -62,10 +62,10 @@ StringLiteral
   = '"' value:$[^"]* '"' { return StringLiteral(value); }
 
 IntegerLiteral
-  = value:$[-+]?[0-9]+ { return IntegerLiteral(value); }
+  = value:$("-"? [0-9]+) { return IntegerLiteral(value); }
 
 FloatLiteral
-  = value:$[-+]?[0-9]+"."[0-9]+ { return FloatLiteral(value); }
+  = value:$("-"? [0-9]+ "." [0-9]+) { return FloatLiteral(value); }
 
 Identifier
   = name:$[a-zA-Z_][a-zA-Z0-9_]* { return Identifier(name); }

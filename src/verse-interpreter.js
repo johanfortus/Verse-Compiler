@@ -23,11 +23,7 @@ export class VerseInterpreter {
     }
   
     visitStatement(statement) {
-      if (!statement || typeof statement !== 'object' || !statement.type) {
-        throw new Error(`Invalid statement: ${JSON.stringify(statement)}`);
-      }
-  
-      console.log('Visiting statement:', statement);
+      console.log('Visiting statement:', JSON.stringify(statement, null, 2));
       switch (statement.type) {
         case 'VariableDeclaration':
           this.visitVariableDeclaration(statement);
@@ -45,20 +41,30 @@ export class VerseInterpreter {
   
     visitVariableDeclaration(declaration) {
       const value = this.evaluateExpression(declaration.value);
-      this.symbolTable.set(declaration.name.name, value);
+      console.log(`Declaring variable ${declaration.name.name} with type ${declaration.varType.name} and value ${value}`);
+      this.symbolTable.set(declaration.name.name, { type: declaration.varType.name, value });
     }
   
     visitSetStatement(setStatement) {
       const value = this.evaluateExpression(setStatement.value);
-      if (!this.symbolTable.has(setStatement.name.name)) {
-        throw new Error(`Cannot set undefined variable: ${setStatement.name.name}`);
+      const varName = setStatement.name.name;
+      if (this.symbolTable.has(varName)) {
+        console.log(`Setting variable ${varName} to value ${value}`);
+        this.symbolTable.set(varName, { ...this.symbolTable.get(varName), value });
+      } else {
+        throw new Error(`Cannot set undeclared variable: ${varName}`);
       }
-      this.symbolTable.set(setStatement.name.name, value);
     }
   
     visitPrintStatement(printStatement) {
-      const value = this.evaluateInterpolatedString(printStatement.value);
-      this.output += value + '\n';
+      try {
+        const value = this.evaluateInterpolatedString(printStatement.value);
+        console.log('Evaluated Print Statement:', value);
+        this.output += value + '\n';
+      } catch (error) {
+        console.error('Error in Print Statement:', error.message);
+        this.output += `Error: ${error.message}\n`;
+      }
     }
   
     evaluateInterpolatedString(interpolatedString) {
@@ -66,27 +72,35 @@ export class VerseInterpreter {
         if (part.type === 'TextPart') {
           return part.text;
         } else if (part.type === 'InterpolatedExpression') {
-          return String(this.evaluateExpression(part.expression));
+          try {
+            return String(this.evaluateExpression(part.expression));
+          } catch (error) {
+            return `<${error.message}>`;
+          }
         }
       }).join('');
     }
   
     evaluateExpression(expression) {
-      console.log('Evaluating expression:', expression);
+      console.log('Evaluating expression:', JSON.stringify(expression, null, 2));
+      let result;
       switch (expression.type) {
         case 'StringLiteral':
-          return expression.value;
         case 'IntegerLiteral':
-          return expression.value;
         case 'FloatLiteral':
-          return expression.value;
+          result = expression.value;
+          break;
         case 'Identifier':
           if (this.symbolTable.has(expression.name)) {
-            return this.symbolTable.get(expression.name);
+            result = this.symbolTable.get(expression.name).value;
+          } else {
+            throw new Error(`Undefined variable: ${expression.name}`);
           }
-          throw new Error(`Undefined variable: ${expression.name}`);
+          break;
         default:
           throw new Error(`Unsupported expression type: ${expression.type}`);
       }
+      console.log(`Expression ${expression.type} evaluated to:`, result);
+      return result;
     }
   }
