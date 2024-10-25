@@ -38,11 +38,11 @@ export class VerseInterpreter {
       case 'IfStatement':
         this.visitIfStatement(statement);
         break;
-      case 'Loop':
+      case 'LoopStatement':
         this.visitLoopStatement(statement);
         break;
-      case 'For':
-        this.visitForStatement(statement);
+      case 'BreakStatement':
+        this.breakEncountered = true;
         break;
       default:
         throw new Error(`Unsupported statement type: ${statement.type}`);
@@ -106,7 +106,7 @@ export class VerseInterpreter {
         this.visitStatement(statement);
         if (this.breakEncountered) {
           this.breakEncountered = false;
-          return;
+          return; 
         }
       }
     }

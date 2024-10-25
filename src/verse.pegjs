@@ -15,6 +15,8 @@
   function BinaryExpression(left, operator, right) { return { type: "BinaryExpression", left: left, operator: operator, right: right }; }
   function UnaryExpression(operator, expression) { return { type: "UnaryExpression", operator: operator, expression: expression }; }
   function IfStatement(condition, body) { return { type: "IfStatement", condition: condition, body: body }; }
+  function LoopStatement(body) { return { type: "LoopStatement", body: body }; }
+  function BreakStatement() { return { type: "BreakStatement" }; }
 }
 
 Start
@@ -28,6 +30,8 @@ Statement
   / SetStatement
   / PrintStatement
   / IfStatement
+  / LoopStatement
+  / BreakStatement
 
 VariableDeclaration
   = "var" _ name:Identifier _ ":" _ varType:Type _ "=" _ value:Expression _ {
@@ -48,6 +52,14 @@ IfStatement
   = "if" _ "(" _ condition:Expression _ ")" _ ":" _ body:Statement+ {
       return IfStatement(condition, body);
     }
+
+LoopStatement
+  = "loop" _ ":" _ body:Statement+ {
+      return LoopStatement(body);
+    }
+
+BreakStatement
+  = "break" _ { return BreakStatement(); }
 
 InterpolatedString
   = '"' parts:InterpolatedPart* '"' { return InterpolatedString(parts); }

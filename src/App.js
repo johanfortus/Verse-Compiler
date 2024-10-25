@@ -24,8 +24,8 @@ function App() {
             setOutput(result);
         }
         catch(e){
-            setOutput("Compilation Error");
-            // setOutput(`Parse error: ${e.message}`);
+            // setOutput("Compilation Error");
+            setOutput(`Parse error: ${e.message}`);
         }
         // setOutput(`Code ${code}`)
     }
