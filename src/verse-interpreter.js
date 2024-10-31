@@ -1,3 +1,14 @@
+/**
+ * verse-interpreter.js
+ * 
+ * This file contains the VerseInterpreter class and responsible for interpreting an Abstract Syntax Tree (AST).
+ * 
+ * The AST is created by the parser generated using PEG.js based on the Verse grammar definition.
+ * PEG.js generates verse-parser.js, and given code input, constructs an AST following the defined grammar rules.
+ * The AST is then used by this interpreter to execute the program logic.
+ * 
+ */
+
 export class VerseInterpreter {
   constructor() {
     this.output = '';
@@ -43,12 +54,17 @@ export class VerseInterpreter {
         break;
       case 'ForStatement':
         this.visitForStatement(statement);
+        break;
       case 'BreakStatement':
-        this.breakEncountered = true;
+        this.visitBreakStatement();
         break;
       default:
         throw new Error(`Unsupported statement type: ${statement.type}`);
     }
+  }
+
+  visitBreakStatement() {
+    this.breakEncountered = true;
   }
 
   visitVariableDeclaration(declaration) {
@@ -95,7 +111,7 @@ export class VerseInterpreter {
 
   visitIfStatement(ifStatement) {
     const condition = this.evaluateExpression(ifStatement.condition);
-    if (condition) {
+    if (condition !== undefined && condition) {
       for (const statement of ifStatement.body) {
         this.visitStatement(statement);
       }
@@ -108,7 +124,7 @@ export class VerseInterpreter {
         this.visitStatement(statement);
         if (this.breakEncountered) {
           this.breakEncountered = false;
-          return; 
+          return;
         }
       }
     }
@@ -121,7 +137,7 @@ export class VerseInterpreter {
     if (typeof start !== "number" || typeof end !== "number") {
       throw new Error("Range values must be integers");
     }
-
+  
     for (let i = start; i <= end; i++) {
       this.symbolTable.set(forStatement.variable.name, { type: "int", value: i });
       for (const statement of forStatement.body) {
@@ -130,6 +146,66 @@ export class VerseInterpreter {
           this.breakEncountered = false;
           return;
         }
+      }
+    }
+  }
+
+  visitArrayLiteral(arrayLiteral) {
+    return arrayLiteral.elements.map(element => this.evaluateExpression(element));
+  }
+
+  visitArrayAccess(arrayAccess) {
+    const array = this.symbolTable.get(arrayAccess.array.name);
+    if (!array || !Array.isArray(array.value)) {
+      throw new Error(`Array ${arrayAccess.array.name} not found`);
+    }
+    const index = this.evaluateExpression(arrayAccess.index);
+    if (index < 0 || index >= array.value.length) {
+      throw new Error(`Index ${index} out of bounds`);
+    }
+    return array.value[index];
+  }
+
+  visitSetStatement(setStatement) {
+    if (setStatement.name.type === 'ArrayAccess') {
+
+      const arrayAccess = setStatement.name;
+      const array = this.symbolTable.get(arrayAccess.array.name);
+  
+      if (!array || !Array.isArray(array.value)) {
+        throw new Error(`Array ${arrayAccess.array.name} not found or not an array`);
+      }
+  
+      const index = this.evaluateExpression(arrayAccess.index);
+      if (index < 0 || index >= array.value.length) {
+        throw new Error(`Index out of bounds: ${index}`);
+      }
+  
+      const newValue = this.evaluateExpression(setStatement.value);
+      console.log(`Setting array ${arrayAccess.array.name} at index ${index} to value ${newValue}`);
+      array.value[index] = newValue;
+    } 
+    else {
+      const value = this.evaluateExpression(setStatement.value);
+      const varName = setStatement.name.name;
+      if (this.symbolTable.has(varName)) {
+        let newValue;
+        switch (setStatement.operator) {
+          case '=':
+            newValue = value;
+            break;
+          case '+=':
+            const currentValue = this.symbolTable.get(varName).value;
+            newValue = currentValue + value;
+            break;
+          default:
+            throw new Error(`Unsupported assignment operator: ${setStatement.operator}`);
+        }
+        console.log(`Setting variable ${varName} to value ${newValue}`);
+        this.symbolTable.set(varName, { ...this.symbolTable.get(varName), value: newValue });
+      } 
+      else {
+        throw new Error(`Cannot set undeclared variable: ${varName}`);
       }
     }
   }
