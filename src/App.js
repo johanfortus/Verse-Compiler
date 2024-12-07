@@ -32,7 +32,7 @@ function App() {
 
     return (
         <div style={{ margin: 0, padding: 0, height: '100%', boxSizing: '100%' }}>
-            <h1>Verse Playground</h1>
+            
 
             <div style={{ display: 'flex', backgroundColor: 'lightgray', height: '100vh' }}>
             
@@ -49,7 +49,7 @@ function App() {
                         defaultLanguage="verse"
                         value={code}
                         onChange={handleEditorChange}
-                        theme="vs-light"
+                        theme="vs-dark"
                     />
                 </div>
                 
