@@ -1,9 +1,11 @@
-const http = require('http');
-const { spawn } = require('child_process');
-const { WebSocketServer } = require('ws');
-const { toSocket } = require('vscode-ws-jsonrpc');
-const { createConnection, forward } = require('vscode-ws-jsonrpc/server');
-const { StreamMessageReader, StreamMessageWriter } = require('vscode-jsonrpc/node');
+import http from 'http';
+import { spawn } from 'child_process';
+import ws from 'ws';
+const { WebSocketServer } = ws;
+
+import { toSocket } from 'vscode-ws-jsonrpc';
+import { createConnection, forward } from 'vscode-ws-jsonrpc/server';
+import { StreamMessageReader, StreamMessageWriter } from 'vscode-jsonrpc/node.js';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });

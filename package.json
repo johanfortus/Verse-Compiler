@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A playground for practicing Verse code",
   "main": "index.js",
+  "type" : "module",
   "scripts": {
     "start": "react-scripts start",
     "test": "echo \"Error: no test specified\" && exit 1"
