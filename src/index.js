@@ -7,7 +7,7 @@ import { initialize } from 'vscode/services';
 
 (async () => {
     await initialize();
-    // await import('./verse-lsp-client.js');
+    await import('./verse-lsp-client.js');
     ReactDOM.render(<App />, document.getElementById('root'));
 })();
 

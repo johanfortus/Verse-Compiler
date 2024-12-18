@@ -10,112 +10,112 @@ import * as monaco from 'monaco-editor';
 
 export function registerVerseLanguage() {
 
-    // Register the 'verse' language with Monaco
-    monaco.languages.register({ id: 'verse' });
+	// Register the 'verse' language with Monaco
+	monaco.languages.register({ id: 'verse' });
 
-    // Set the language rules for syntax highlighting using Monarch Tokens Provider
-    monaco.languages.setMonarchTokensProvider('verse', {
+	// Set the language rules for syntax highlighting using Monarch Tokens Provider
+	monaco.languages.setMonarchTokensProvider('verse', {
 
-        // Keywords
-        keywords: [
-            'function', 'var', 'let', 'if', 'else', 'for', 'return', 'Print'
-        ],
-        typeKeywords: [
-            'string', 'number', 'boolean', 'void'
-        ],
+		// Keywords
+		keywords: [
+			'function', 'var', 'let', 'if', 'else', 'for', 'return', 'Print'
+		],
+		typeKeywords: [
+			'string', 'number', 'boolean', 'void'
+		],
 
-        // Operators
-        operators: [
-            '=', '>', '<', '!', '~', '?', ':', '==', '<=', '>=', '!=',
-            '&&', '||', '++', '--', '+', '-', '*', '/', '&', '|', '^', '%',
-            '<<', '>>', '>>>'
-        ],
+		// Operators
+		operators: [
+			'=', '>', '<', '!', '~', '?', ':', '==', '<=', '>=', '!=',
+			'&&', '||', '++', '--', '+', '-', '*', '/', '&', '|', '^', '%',
+			'<<', '>>', '>>>'
+		],
 
-        // Symbols
-        symbols:  /[=><!~?:&|+\-*\/\^%]+/,
+		// Symbols
+		symbols: /[=><!~?:&|+\-*\/\^%]+/,
 
-        // Escapes
-        escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
+		// Escapes
+		escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
 
-        // Tokenizer rules 
-        tokenizer: {
-            root: [
+		// Tokenizer rules 
+		tokenizer: {
+			root: [
 
-                // Rules for identifiers (variables, functions, etc) which are classified by cases
-                [/[a-z_$][\w$]*/, {
-                    cases: {
-                        '@typeKeywords': 'keyword',
-                        '@keywords': 'keyword',
-                        '@default': 'identifier'
-                    }
-                }],
+				// Rules for identifiers (variables, functions, etc) which are classified by cases
+				[/[a-z_$][\w$]*/, {
+					cases: {
+						'@typeKeywords': 'keyword',
+						'@keywords': 'keyword',
+						'@default': 'identifier'
+					}
+				}],
 
-                // Identifies type identifiers that start with an uppercase letter
-                [/[A-Z][\w\$]*/, 'type.identifier'],
+				// Identifies type identifiers that start with an uppercase letter
+				[/[A-Z][\w\$]*/, 'type.identifier'],
 
-                // Include whitespace rules
-                { include: '@whitespace' },
+				// Include whitespace rules
+				{ include: '@whitespace' },
 
-                // Recognizes brackets for grouping code
-                [/[{}()\[\]]/, '@brackets'],
+				// Recognizes brackets for grouping code
+				[/[{}()\[\]]/, '@brackets'],
 
-                // Recognizes angle brackets in contexts other than as symbols
-                [/[<>](?!@symbols)/, '@brackets'],
+				// Recognizes angle brackets in contexts other than as symbols
+				[/[<>](?!@symbols)/, '@brackets'],
 
-                // Recognizes operators based on the defined list
-                [/@symbols/, {
-                    cases: {
-                        '@operators': 'operator',
-                        '@default'  : ''
-                    }
-                }],
+				// Recognizes operators based on the defined list
+				[/@symbols/, {
+					cases: {
+						'@operators': 'operator',
+						'@default': ''
+					}
+				}],
 
-                // Recognizes floating-point numbers
-                [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
+				// Recognizes floating-point numbers
+				[/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
 
-                // Recognizes hexadecimal numbers
-                [/0[xX][0-9a-fA-F]+/, 'number.hex'],
+				// Recognizes hexadecimal numbers
+				[/0[xX][0-9a-fA-F]+/, 'number.hex'],
 
-                // Recognizes integer numbers
-                [/\d+/, 'number'],
+				// Recognizes integer numbers
+				[/\d+/, 'number'],
 
-                // Recognizes delimiters such as semicolons and commas
-                [/[;,.]/, 'delimiter'],
+				// Recognizes delimiters such as semicolons and commas
+				[/[;,.]/, 'delimiter'],
 
-                // Identifies unterminated strings as invalid
-                [/"([^"\\]|\\.)*$/, 'string.invalid'],
+				// Identifies unterminated strings as invalid
+				[/"([^"\\]|\\.)*$/, 'string.invalid'],
 
-                // Recognizes strings starting with a double quote
-                [/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
-            ],
+				// Recognizes strings starting with a double quote
+				[/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
+			],
 
-            // Defines how comments are handled
-            comment: [
-                [/[^\#]+/, 'comment' ],
-                [/#/, 'comment', '@pop']
-            ],
+			// Defines how comments are handled
+			comment: [
+				[/[^\#]+/, 'comment'],
+				[/#/, 'comment', '@pop']
+			],
 
-            // Rules for string tokenization
-            string: [
+			// Rules for string tokenization
+			string: [
 
-                // Recognizes valid string content
-                [/[^\\"]+/, 'string'],
+				// Recognizes valid string content
+				[/[^\\"]+/, 'string'],
 
-                // Recognizes escape sequences within strings
-                [/@escapes/, 'string.escape'],
+				// Recognizes escape sequences within strings
+				[/@escapes/, 'string.escape'],
 
-                // Recognizes invalid escape sequences
-                [/\\./, 'string.escape.invalid'],
+				// Recognizes invalid escape sequences
+				[/\\./, 'string.escape.invalid'],
 
-                // Closes strings when encountering a closing quote
-                [/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }]
-            ],
+				// Closes strings when encountering a closing quote
+				[/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }]
+			],
 
-            // Defines handling of whitespace and comments
-            whitespace: [
-                [/[ \t\r\n]+/, 'white'],
-                [/#.*$/, 'comment'],
-            ],
-        },
-    });
+			// Defines handling of whitespace and comments
+			whitespace: [
+				[/[ \t\r\n]+/, 'white'],
+				[/#.*$/, 'comment'],
+			],
+		},
+	});
 }

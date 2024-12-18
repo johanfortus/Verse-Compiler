@@ -11,17 +11,18 @@ const server = http.createServer();
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', (socket) => {
-  const wsSocket = toSocket(socket);
+	const wsSocket = toSocket(socket);
 
-  const child = spawn('/usr/local/bin/verse-lsp');
-  
-  const reader = new StreamMessageReader(child.stdout);
-  const writer = new StreamMessageWriter(child.stdin);
+	const child = spawn('/usr/local/bin/verse-lsp');
 
-  const socketConnection = createConnection(wsSocket);
-  forward(socketConnection, reader, writer, socketConnection);
+	const reader = new StreamMessageReader(child.stdout);
+	const writer = new StreamMessageWriter(child.stdin);
+
+	const socketConnection = createConnection(wsSocket);
+	forward(socketConnection, reader, writer, socketConnection);
+	socketConnection.listen();
 });
 
 server.listen(3001, () => {
-  console.log('LSP server is listening on port 3001');
+	console.log('LSP server is listening on port 3001');
 });
