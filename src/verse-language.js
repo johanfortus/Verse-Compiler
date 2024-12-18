@@ -127,17 +127,17 @@ export function registerVerseLanguage(monaco) {
 		base: 'vs-dark',
 		inherit: true,
 		rules: [
-			{ token: 'keyword', foreground: '#569CD6' },
-			{ token: 'type', foreground: '#4EC9B0' },
-			{ token: 'number', foreground: '#B5CEA8' },
-			{ token: 'string', foreground: '#CE9178' },
+			{ token: 'keyword', foreground: '#E3C0FD' },
+			{ token: 'type', foreground: '#4EC9B0' }, 
+			{ token: 'number', foreground: '#B5CEA8' }, // good
+			{ token: 'string', foreground: '#CE9178' }, // good
 			{ token: 'comment', foreground: '#6A9955' },
 			{ token: 'operator', foreground: '#D4D4D4' },
-			{ token: 'identifier', foreground: '#9CDCFE' },
-			{ token: '@brackets', foreground: '#FFD700' }
+			{ token: 'identifier', foreground: '#E3C0FD'},
+			{ token: '@brackets', foreground: '#E6C601' }
 		],
 		colors: {
-			'editor.background': '#1E1E1E',
+			'editor.background': '#000000',
 		}
 	});
 	console.log('verse theme loaded');
