@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { parse } from './verse-parser.js';
 import { VerseInterpreter } from './verse-interpreter.js';
@@ -12,11 +12,11 @@ function App() {
 	const [astOutput, setAstOutput] = useState('');
 	const interpreter = new VerseInterpreter();
 
-	useEffect(() => {
-        registerVerseLanguage();
-        monaco.editor.setTheme('verse-theme');
-        console.log('verse-theme applied');
-    }, []);
+	const handleEditorMount = (editor, monaco) => {
+		console.log('monaco is ready');
+		registerVerseLanguage(monaco);
+		monaco.editor.setTheme('verse-theme');
+	}
 
 	const handleEditorChange = (value) => {
 		setCode(value);
@@ -59,7 +59,7 @@ function App() {
 						theme="verse-theme"
 						value={code}
 						onChange={handleEditorChange}
-						
+						onMount={handleEditorMount}
 					/>
 				</div>
 
