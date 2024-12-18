@@ -15,7 +15,7 @@ function App() {
 	const handleEditorMount = (editor, monaco) => {
 		console.log('monaco is ready');
 		registerVerseLanguage(monaco);
-		monaco.editor.setTheme('verse-theme');
+		monaco.editor.setTheme('verse-dark');
 	}
 
 	const handleEditorChange = (value) => {
@@ -56,10 +56,12 @@ function App() {
 						height="80%"
 						defaultLanguage="verse"
 						language='verse'
-						theme="verse-theme"
+						theme="verse-dark"
 						value={code}
 						onChange={handleEditorChange}
-						onMount={handleEditorMount}
+						onMount={(editor, monaco) => {
+							monaco.editor.setTheme('verse-dark')
+						}}
 					/>
 				</div>
 

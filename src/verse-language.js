@@ -8,6 +8,7 @@
 
 // import * as monaco from 'monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
+import verseDarkTheme from './verse-dark-theme.json';
 
 export function registerVerseLanguage(monaco) {
 
@@ -123,21 +124,13 @@ export function registerVerseLanguage(monaco) {
 	});
 	console.log("Verse tokenizer loaded");
 
-	monaco.editor.defineTheme('verse-theme', {
+	monaco.editor.defineTheme('verse-dark', {
 		base: 'vs-dark',
 		inherit: true,
-		rules: [
-			{ token: 'keyword', foreground: '#E3C0FD' },
-			{ token: 'type', foreground: '#4EC9B0' }, 
-			{ token: 'number', foreground: '#B5CEA8' }, // good
-			{ token: 'string', foreground: '#CE9178' }, // good
-			{ token: 'comment', foreground: '#6A9955' },
-			{ token: 'operator', foreground: '#D4D4D4' },
-			{ token: 'identifier', foreground: '#E3C0FD'},
-			{ token: '@brackets', foreground: '#E6C601' }
-		],
+		rules: verseDarkTheme.tokenColors,
 		colors: {
-			'editor.background': '#000000',
+			...verseDarkTheme.colors,
+			'editor.background': '#000000'
 		}
 	});
 	console.log('verse theme loaded');
