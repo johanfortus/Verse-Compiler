@@ -232,7 +232,7 @@ UnaryOperator
 AssignmentOperator
   = "=" / "+=" {
       console.log("Captured AssignmentOperator:", text());
-      return { type: "AssignmentOperator", value: text() };
+      return text();
   }
 
 
