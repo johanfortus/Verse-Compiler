@@ -235,6 +235,8 @@ export class VerseInterpreter {
 				break;
 			case 'Identifier':
 				if (this.symbolTable.has(expression.name)) {
+					const variable = this.symbolTable.get(expression.name);
+					console.log(`Retrieving variable '${expression.name}' with value: ${variable.value}`)
 					result = this.symbolTable.get(expression.name).value;
 				}
 				else {
