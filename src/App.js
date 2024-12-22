@@ -7,7 +7,7 @@ import { registerVerseLanguage } from './verse-language.js';
 // registerVerseLanguage();
 
 function App() {
-	const [code, setCode] = useState('// Write your Verse code here');
+	const [code, setCode] = useState('# Write your Verse code here');
 	const [output, setOutput] = useState('');
 	const [astOutput, setAstOutput] = useState('');
 	const interpreter = new VerseInterpreter();

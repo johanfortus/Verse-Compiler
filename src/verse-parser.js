@@ -319,7 +319,7 @@ function peg$parse(input, options) {
   var peg$f19 = function(expr) { return expr; };
   var peg$f20 = function() {
       console.log("Captured AssignmentOperator:", text());
-      return { type: "AssignmentOperator", value: text() };
+      return text();
   };
   var peg$f21 = function(value) { return StringLiteral(value); };
   var peg$f22 = function(value) { return IntegerLiteral(value); };
