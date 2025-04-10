@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Editor from '@monaco-editor/react';
+import Editor from '../Editor/Editor.jsx';
 import { defaultCode } from '../../utils/defaultCode.js';
 import { parse } from '../../utils/parser.js';
 import { VerseInterpreter } from '../../utils/interpreter.js';
@@ -16,10 +16,6 @@ function App() {
 		registerVerseLanguage(monaco);
 		monaco.editor.setTheme('verse-dark');
 	}
-
-	const handleEditorChange = (value) => {
-		setCode(value);
-	};
 
 	const runCode = () => {
 		try {
@@ -50,19 +46,7 @@ function App() {
 						<button style={{ marginLeft: '10px' }} onClick={runCode}>Run Code</button>
 					</h2>
 
-					<Editor
-						height="80%"
-						defaultLanguage="verse"
-						language='verse'
-						theme="verse-dark"
-						value={code}
-						onChange={handleEditorChange}
-						onMount={handleEditorMount}
-						options={{
-							fontSize: 14,
-							autoClosingBrackets: 'always',
-						}}
-					/>
+					<Editor code={code} setCode={setCode} handleEditorMount={handleEditorMount} />
 				</div>
 
 
