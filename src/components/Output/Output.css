@@ -3,15 +3,15 @@
     display: flex;
     flex-direction: column;
     width: 50%;
+    background-color: black;
     border-left: 1px solid rgb(82, 82, 82);
 }
 
 .output-header {
-    padding-bottom: 10px;
+    height: 40px;
     padding-top: 10px;
     background-color: rgb(44, 47, 52);
-    border-bottom: 1px solid rgb(82, 82, 82);
-    
+    border-bottom: 1px solid rgb(82, 82, 82);   
 }
 
 .output-title {

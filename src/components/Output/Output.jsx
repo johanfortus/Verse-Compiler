@@ -10,7 +10,7 @@ const Output = ({ output }) => {
             </div>
 
 
-            <div style={{ height: '80%', overflowY: 'scroll', color: '#FFFFFF', backgroundColor: '#000000', paddingLeft: '5px', paddingTop: '5px', fontSize: '14px' }}>
+            <div style={{ height: '80%', overflowY: 'scroll', color: '#FFFFFF', paddingLeft: '5px', paddingTop: '5px', fontSize: '14px' }}>
                 <pre>{output}</pre>
             </div>
         </div>
