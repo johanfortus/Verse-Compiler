@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Header from '../Header/Header.jsx';
 import Editor from '../Editor/Editor.jsx';
 import Output from '../Output/Output.jsx';
 import { defaultCode } from '../../utils/defaultCode.js';
@@ -34,15 +35,14 @@ function App() {
 	};
 
 	return (
-		<div>
-			<h1 style={{ padding: 3 }}>Verse Compiler</h1>
+		<>
+			<Header />
 
 			<div style={{ display: 'flex', backgroundColor: 'lightgray', height: '100vh' }}>
 				<Editor code={code} setCode={setCode} handleEditorMount={handleEditorMount} runCode={runCode} />
 				<Output output={output} />
 			</div>
-
-		</div>
+		</>
 	);
 };
 
