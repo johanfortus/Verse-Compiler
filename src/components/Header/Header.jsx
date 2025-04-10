@@ -7,7 +7,6 @@ const Header = () => {
         <div className="header-container">
             <img src={logo} className='logo-icon'></img>
             <span className='logo-title'>Verse Compiler</span>
-            
         </div>
     );
 };
