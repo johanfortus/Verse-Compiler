@@ -308,4 +308,14 @@ export class VerseInterpreter {
 				throw new Error(`Unsupported unary operator: ${expression.operator}`);
 		}
 	}
+
+	evaluateCondition(node) {
+		if (node.type === 'ConditionalBinding') {
+			const value = this.evaluateExpression(node.expr);
+			if (value !== undefined) {
+				this.symbolTable.set(node.variable.name, { type: Array.isArray(value)? 'array' : typeof value, value });
+				
+			}
+		}
+	}
 }

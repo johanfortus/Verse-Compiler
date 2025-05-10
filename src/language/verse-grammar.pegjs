@@ -112,9 +112,13 @@ PrintStatement
       return PrintStatement(value);
     }
 
+ConditionalBinding
+  = v:Identifier _ ':=' _ e:LogicalExpression {
+      return { type: "ConditionalBinding", variable:v, expr:e }
+  }
 
 IfStatement
-  = "if" _ "(" _ condition:Expression _ ")" _ ":" _ body:Statement+ {
+  = "if" _ "(" _ condition:(ConditionalBinding / LogicalExpression) _ ")" _ ":" _ body:Statement+ {
       return IfStatement(condition, body);
     }
 
