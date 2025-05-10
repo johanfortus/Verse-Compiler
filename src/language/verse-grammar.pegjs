@@ -155,7 +155,10 @@ TextPart
 
 
 InterpolatedExpression
-  = "{" _ expr:Expression _ "}" { return InterpolatedExpression(expr); }
+  = "{" _ expr:Expression _ "}" {
+      console.log("Captured InterpolatedExpression:", expr);
+      return InterpolatedExpression(expr);
+    }
 
 
 Expression
@@ -213,6 +216,7 @@ PrimaryExpression
   / FloatLiteral
   / IntegerLiteral
   / BooleanLiteral
+  / ArrayAccess
   / Identifier
   / "(" _ expr:Expression _ ")" { return expr; }
 
@@ -283,6 +287,7 @@ ArrayType
 
 ArrayAccess
   = array:Identifier "[" _ index:Expression _ "]" {
+      console.log("Captured ArrayAccess:", array.name, index);
       return { type: "ArrayAccess", array: array, index: index };
     }
 

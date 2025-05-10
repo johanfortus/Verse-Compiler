@@ -259,6 +259,9 @@ export class VerseInterpreter {
 				}
 				result = array.length;
 				break;
+			case 'ArrayAccess':
+				result = this.visitArrayAccess(expression);
+				break;
 			case 'BinaryExpression':
 				result = this.evaluateBinaryExpression(expression);
 				break;
