@@ -112,16 +112,15 @@ PrintStatement
       return PrintStatement(value);
     }
 
-ConditionalBinding
-  = v:Identifier _ ':=' _ e:LogicalExpression {
-      return { type: "ConditionalBinding", variable:v, expr:e }
-  }
-
 IfStatement
-  = "if" _ "(" _ condition:(ConditionalBinding / LogicalExpression) _ ")" _ ":" _ body:Statement+ {
+  = "if" _ "(" _ condition:(AssignmentExpression / LogicalExpression) _ ")" _ ":" _ body:Statement+ {
       return IfStatement(condition, body);
     }
 
+AssignmentExpression
+  = variable:Identifier _ ":=" _ value:Expression {
+      return { type: "AssignmentExpression", variable: variable, value: value };
+  }
 
 LoopStatement
   = "loop" _ ":" _ body:Statement+ {

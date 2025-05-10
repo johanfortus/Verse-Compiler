@@ -112,7 +112,7 @@ export class VerseInterpreter {
 
 	visitIfStatement(ifStatement) {
 		const condition = this.evaluateExpression(ifStatement.condition);
-		if (condition !== undefined && condition) {
+		if (condition !== null && condition) {
 			for (const statement of ifStatement.body) {
 				this.visitStatement(statement);
 			}
@@ -158,11 +158,13 @@ export class VerseInterpreter {
 	visitArrayAccess(arrayAccess) {
 		const array = this.symbolTable.get(arrayAccess.array.name);
 		if (!array || !Array.isArray(array.value)) {
-			throw new Error(`Array ${arrayAccess.array.name} not found`);
+			console.log(`Array ${arrayAccess.array.name} not found`);
+			return null;
 		}
 		const index = this.evaluateExpression(arrayAccess.index);
 		if (index < 0 || index >= array.value.length) {
-			throw new Error(`Index ${index} out of bounds`);
+			console.log(`Index ${index} out of bounds`);
+			return null;
 		}
 		return array.value[index];
 	}
@@ -268,6 +270,10 @@ export class VerseInterpreter {
 			case 'UnaryExpression':
 				result = this.evaluateUnaryExpression(expression);
 				break;
+			case 'AssignmentExpression':
+				const value = this.evaluateExpression(expression.value);
+				this.symbolTable.set(expression.variable.name, { type: "dynamic", value });
+				return value;
 			case 'Range':
 				const start = this.evaluateExpression(expression.start);
 				const end = this.evaluateExpression(expression.end);
@@ -306,16 +312,6 @@ export class VerseInterpreter {
 			case '?': return !!operand;
 			default:
 				throw new Error(`Unsupported unary operator: ${expression.operator}`);
-		}
-	}
-
-	evaluateCondition(node) {
-		if (node.type === 'ConditionalBinding') {
-			const value = this.evaluateExpression(node.expr);
-			if (value !== undefined) {
-				this.symbolTable.set(node.variable.name, { type: Array.isArray(value)? 'array' : typeof value, value });
-				
-			}
 		}
 	}
 }
