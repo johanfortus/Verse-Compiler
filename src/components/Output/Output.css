@@ -22,8 +22,15 @@
 }
 
 .output-container {
+    overflow-x: hidden;
+    overflow-y: auto;
     color: white;
     padding-left: 5px;
     padding-top: 5px;
     font-size: 14px;
+}
+
+.output-container pre {
+    white-space: pre-wrap;
+    word-break: break-word;
 }
