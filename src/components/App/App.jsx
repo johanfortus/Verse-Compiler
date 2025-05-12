@@ -11,7 +11,6 @@ function App() {
 	const [code, setCode] = useState(defaultCode);
 	const [output, setOutput] = useState('');
 	const [astOutput, setAstOutput] = useState('');
-	const interpreter = new VerseInterpreter();
 
 	const handleEditorMount = (editor, monaco) => {
 		console.log('monaco is ready');
@@ -20,6 +19,7 @@ function App() {
 	};
 
 	const runCode = () => {
+		const interpreter = new VerseInterpreter();
 		try {
 			console.log("Raw Input Code:", code);
 			const ast = compileIntoVerse(code);
