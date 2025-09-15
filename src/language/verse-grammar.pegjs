@@ -75,7 +75,7 @@ Start
 
 // Defines the Program rule, which consists of multiple statements.
 Program
-  = statements:Statement* { return Program(statements); }
+  = _ statements:Statement* _ { return Program(statements); }
 
 // Defines a statement like variable declaration, set statements, loops, etc.
 Statement
@@ -318,4 +318,4 @@ Type
 
 
 _ "whitespace"
-  = [ \t\n\r]*
+  = ([ \t\n\r] / "#" [^\r\n]*)*
