@@ -47,7 +47,7 @@
 
   function LoopStatement(body) { return { type: "LoopStatement", body: body }; }
 
-  function ForStatement(variable, start, end, body) { return { type: "ForStatement", variable: variable, range: {type : "Range", start, end}, body: body }; }
+  function ForStatement(variable, varType, start, end, body) { return { type: "ForStatement", variable: variable, varType: varType, range: {type : "Range", start, end}, body: body }; }
 
   function Range(start, end) { return { type: "Range", start, end }; }
 
@@ -141,7 +141,10 @@ LoopStatement
 
 ForStatement
   = "for" _ "(" _ variable:Identifier _ ":=" _ start:Expression _ ".." _ end:Expression _ ")" _ ":" _ body:Statement+ "end" _ {
-      return ForStatement(variable, start, end, body);
+      return ForStatement(variable, null, start, end, body);
+    }
+    / "for" _ "(" _ variable:Identifier _ ":" _ varType:(Type / ArrayType) _ "=" _ start:Expression _ ".." _ end:Expression _ ")" _ ":" _ body:Statement+ "end" _ {
+      return ForStatement(variable, varType, start, end, body);
     }
     
 

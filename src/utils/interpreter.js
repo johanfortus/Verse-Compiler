@@ -175,8 +175,10 @@ export class VerseInterpreter {
 			throw new Error("Range values must be integers");
 		}
 
+		const varType = forStatement.varType ? forStatement.varType.name : "int";
+
 		for (let i = start; i <= end; i++) {
-			this.symbolTable.set(forStatement.variable.name, { type: "int", value: i });
+			this.symbolTable.set(forStatement.variable.name, { type: varType, value: i });
 			for (const statement of forStatement.body) {
 				this.visitStatement(statement);
 				if (this.breakEncountered) {
