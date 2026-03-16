@@ -1,152 +1,150 @@
-// verse-language.js
-// This file defines how the Verse syntax is recognized by the Monaco editor.
-// Keywords & Operators - Specifies syntax elements like keywords and operators
-// Tokenizer: Defines rules for tokenizing the Verse language:
-// root: Describes the primary structure, including keywords, identifiers, and string literals.
-// comment, string, and whitespace: Define how to handle comments, strings, and whitespace.
+import { INITIAL, Registry, parseRawGrammar } from 'vscode-textmate';
+import { loadWASM, OnigScanner, OnigString } from 'vscode-oniguruma';
+import verseTheme from './tm/verse-dark.tmTheme.json';
+import verseGrammar from './tm/verse.tmLanguage.json';
+import languageConfiguration from './tm/language-configuration.json';
+import onigWasmUrl from 'vscode-oniguruma/release/onig.wasm?url';
 
+const VERSE_LANGUAGE_ID = 'verse';
+const VERSE_SCOPE_NAME = 'source.verse';
 
-// import * as monaco from 'monaco-editor';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
-import verseDarkTheme from '../themes/verse-dark.json';
+let isVerseRegistered = false;
+let grammarPromise;
 
-export function registerVerseLanguage(monaco) {
+class TextMateState {
+	constructor(ruleStack) {
+		this.ruleStack = ruleStack;
+	}
 
-	// Register the 'verse' language with Monaco
-	console.log("Before registering language");
-	monaco.languages.register({ id: 'verse' });
-	console.log("Verse language registered");
+	clone() {
+		return new TextMateState(this.ruleStack);
+	}
 
-	// Set the language rules for syntax highlighting using Monarch Tokens Provider
-	monaco.languages.setMonarchTokensProvider('verse', {
+	equals(other) {
+		return this.ruleStack === other.ruleStack;
+	}
+}
 
-		// Keywords
-		keywords: [
-			'function', 'var', 'let', 'if', 'else', 'for', 'return', 'Print',
-			'decides', 'transacts', 'override', 'suspends', 'using'
-		],
-		typeKeywords: [
-			'string', 'number', 'boolean', 'void'
-		],
+function normalizeFontStyle(fontStyle = '') {
+	return fontStyle.trim();
+}
 
-		// Operators
-		operators: [
-			'=', '>', '<', '!', '~', '?', ':', '==', '<=', '>=', '!=',
-			'&&', '||', '++', '--', '+', '-', '*', '/', '&', '|', '^', '%',
-			'<<', '>>', '>>>'
-		],
+function toMonacoTheme(theme) {
+	const rules = theme.tokenColors.flatMap((entry) => {
+		const scopes = Array.isArray(entry.scope) ? entry.scope : [entry.scope];
 
-		// Symbols
-		symbols: /[=><!~?:&|+\-*\/\^%]+/,
-
-		// Escapes
-		escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
-
-		// Tokenizer rules 
-		tokenizer: {
-			root: [
-
-				// Rules for identifiers (variables, functions, etc) which are classified by cases
-				[/[a-z_$][\w$]*/, {
-					cases: {
-						'@typeKeywords': 'keyword',
-						'@keywords': 'keyword',
-						'@default': 'identifier'
-					}
-				}],
-
-				// Identifies type identifiers that start with an uppercase letter
-				[/[A-Z][\w\$]*/, 'type.identifier'],
-
-				// Include whitespace rules
-				{ include: '@whitespace' },
-
-				// Recognizes brackets for grouping code
-				[/[{}()\[\]]/, '@brackets'],
-
-				// Recognizes angle brackets in contexts other than as symbols
-				[/[<>](?!@symbols)/, '@brackets'],
-
-				// Recognizes operators based on the defined list
-				[/@symbols/, {
-					cases: {
-						'@operators': 'operator',
-						'@default': ''
-					}
-				}],
-
-				// Recognizes floating-point numbers
-				[/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
-
-				// Recognizes hexadecimal numbers
-				[/0[xX][0-9a-fA-F]+/, 'number.hex'],
-
-				// Recognizes integer numbers
-				[/\d+/, 'number'],
-
-				// Recognizes delimiters such as semicolons and commas
-				[/[;,.]/, 'delimiter'],
-
-				// Identifies unterminated strings as invalid
-				[/"([^"\\]|\\.)*$/, 'string.invalid'],
-
-				// Recognizes strings starting with a double quote
-				[/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
-			],
-
-			// Defines how comments are handled
-			comment: [
-				[/[^\#]+/, 'comment'],
-				[/#/, 'comment', '@pop']
-			],
-
-			// Rules for string tokenization
-			string: [
-
-				// Recognizes valid string content
-				[/[^\\"]+/, 'string'],
-
-				// Recognizes escape sequences within strings
-				[/@escapes/, 'string.escape'],
-
-				// Recognizes invalid escape sequences
-				[/\\./, 'string.escape.invalid'],
-
-				// Closes strings when encountering a closing quote
-				[/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }]
-			],
-
-			// Defines handling of whitespace and comments
-			whitespace: [
-				[/[ \t\r\n]+/, 'white'],
-				[/#.*$/, 'comment'],
-			],
-		},
+		return scopes
+			.filter(Boolean)
+			.map((scope) => ({
+				token: scope,
+				foreground: entry.settings?.foreground?.replace('#', ''),
+				fontStyle: normalizeFontStyle(entry.settings?.fontStyle),
+			}));
 	});
-	console.log("Verse tokenizer loaded");
 
-    monaco.languages.setLanguageConfiguration('verse', {
-        autoClosingPairs: [
-            { open: '(', close: ')' },
-            { open: '{', close: '}' },
-            { open: '[', close: ']' },
-            { open: '"', close: '"' },
-            { open: "'", close: "'" },
-        ],
-        surroundingPairs: [
-            { open: '(', close: ')' },
-            { open: '{', close: '}' },
-            { open: '[', close: ']' },
-            { open: '"', close: '"' },
-            { open: "'", close: "'" },
-        ],
-    });
-
-	monaco.editor.defineTheme('verse-dark', {
+	return {
 		base: 'vs-dark',
 		inherit: true,
-		rules: verseDarkTheme.tokenColors,
-		colors: verseDarkTheme.colors
+		rules,
+		colors: theme.colors,
+	};
+}
+
+function toRegExp(pattern) {
+	return pattern ? new RegExp(pattern) : undefined;
+}
+
+function getAutoClosingPairs() {
+	return languageConfiguration.autoClosingPairs
+		?? languageConfiguration['autoClosingPairs-disabled']
+		?? [];
+}
+
+function getSurroundingPairs() {
+	return languageConfiguration.surroundingPairs
+		?? languageConfiguration['surroundingPairs-disabled']
+		?? [];
+}
+
+function getMostSpecificScope(scopes) {
+	return [...scopes].reverse().find((scope) => scope !== VERSE_SCOPE_NAME) ?? VERSE_SCOPE_NAME;
+}
+
+async function getVerseGrammar() {
+	if (!grammarPromise) {
+		grammarPromise = (async () => {
+			const wasm = await fetch(onigWasmUrl).then((response) => response.arrayBuffer());
+			await loadWASM(wasm);
+
+			const registry = new Registry({
+				onigLib: Promise.resolve({
+					createOnigScanner(patterns) {
+						return new OnigScanner(patterns);
+					},
+					createOnigString(value) {
+						return new OnigString(value);
+					},
+				}),
+				loadGrammar: async (scopeName) => {
+					if (scopeName !== VERSE_SCOPE_NAME) {
+						return null;
+					}
+
+					return parseRawGrammar(
+						JSON.stringify(verseGrammar),
+						'verse.tmLanguage.json',
+					);
+				},
+			});
+
+			return registry.loadGrammar(VERSE_SCOPE_NAME);
+		})();
+	}
+
+	return grammarPromise;
+}
+
+export async function registerVerseLanguage(monaco) {
+	if (isVerseRegistered) {
+		return;
+	}
+
+	monaco.languages.register({ id: VERSE_LANGUAGE_ID });
+
+	monaco.languages.setLanguageConfiguration(VERSE_LANGUAGE_ID, {
+		comments: languageConfiguration.comments,
+		brackets: languageConfiguration.brackets,
+		indentationRules: {
+			increaseIndentPattern: toRegExp(languageConfiguration.indentationRules?.increaseIndentPattern),
+			decreaseIndentPattern: toRegExp(languageConfiguration.indentationRules?.decreaseIndentPattern),
+		},
+		autoClosingPairs: getAutoClosingPairs(),
+		surroundingPairs: getSurroundingPairs(),
 	});
-	console.log('verse theme loaded');
+
+	monaco.editor.defineTheme('verse-dark', toMonacoTheme(verseTheme));
+	monaco.editor.setTheme('verse-dark');
+
+	const grammar = await getVerseGrammar();
+
+	monaco.languages.setTokensProvider(VERSE_LANGUAGE_ID, {
+		getInitialState() {
+			return new TextMateState(INITIAL);
+		},
+
+		tokenize(line, state) {
+			const stack = state instanceof TextMateState ? state.ruleStack : INITIAL;
+			const tokenizedLine = grammar.tokenizeLine(line, stack);
+
+			return {
+				endState: new TextMateState(tokenizedLine.ruleStack),
+				tokens: tokenizedLine.tokens.map((token) => ({
+					startIndex: token.startIndex,
+					scopes: getMostSpecificScope(token.scopes),
+				})),
+			};
+		},
+	});
+
+	isVerseRegistered = true;
 }

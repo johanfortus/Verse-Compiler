@@ -20,6 +20,8 @@
     "react-scripts": "^5.0.1",
     "vscode-languageclient": "^9.0.1",
     "vscode-languageserver-protocol": "^3.17.5",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2",
     "vscode-ws-jsonrpc": "^3.4.0"
   },
   "devDependencies": {

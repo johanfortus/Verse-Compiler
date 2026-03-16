@@ -13,9 +13,9 @@ function App() {
 	const [astOutput, setAstOutput] = useState('');
 
 	const handleEditorMount = (editor, monaco) => {
-		console.log('monaco is ready');
-		registerVerseLanguage(monaco);
-		monaco.editor.setTheme('verse-dark');
+		registerVerseLanguage(monaco).catch((error) => {
+			console.error('Failed to register Verse language support', error);
+		});
 	};
 
 	const runCode = () => {

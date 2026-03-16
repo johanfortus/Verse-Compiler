@@ -35,6 +35,9 @@ const CodeEditor = ({ code, setCode, handleEditorMount, runCode }) => {
                 options={{
                     fontSize: 14,
                     autoClosingBrackets: 'always',
+                    selectionHighlight: false,
+                    occurrencesHighlight: 'off',
+                    renderLineHighlight: 'line',
                     scrollbar: {
                         vertical: 'hidden',
                         horizontal: 'hidden',
