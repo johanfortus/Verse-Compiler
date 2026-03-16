@@ -77,6 +77,8 @@
 
   function ExpressionStatement(expression) { return { type: "ExpressionStatement", expression: expression }; }
 
+  function BraceBlock(body) { return body; }
+
 }
 
 
@@ -165,6 +167,9 @@ ClassDefinition
   = name:Identifier _ ":=" _ "class" _ "(" _ parentClass:Identifier _ ")" _ ":" _ members:Statement+ "end" _ {
       return ClassDefinition(name, parentClass, members);
     }
+  / name:Identifier _ ":=" _ "class" _ "(" _ parentClass:Identifier _ ")" members:BraceBlock {
+      return ClassDefinition(name, parentClass, members);
+    }
 
 
 SetStatement
@@ -185,6 +190,12 @@ IfStatement
   / "if" _ "(" _ condition:(AssignmentExpression / LogicalExpression) _ ")" _ ":" _ body:Statement+ !(_ "else") "end" _ {
       return IfStatement(condition, body, []);
     }
+  / "if" _ "(" _ condition:(AssignmentExpression / LogicalExpression) _ ")" body:BraceBlock _ "else" elseBody:BraceBlock {
+      return IfStatement(condition, body, elseBody);
+    }
+  / "if" _ "(" _ condition:(AssignmentExpression / LogicalExpression) _ ")" body:BraceBlock {
+      return IfStatement(condition, body, []);
+    }
 
 AssignmentExpression
   = variable:Identifier _ ":=" _ value:Expression {
@@ -195,6 +206,9 @@ LoopStatement
   = "loop" _ ":" _ body:Statement+ "end" _ {
       return LoopStatement(body);
     }
+  / "loop" body:BraceBlock {
+      return LoopStatement(body);
+    }
 
 
 ForStatement
@@ -202,6 +216,12 @@ ForStatement
       return ForStatement(variable, null, start, end, body);
     }
     / "for" _ "(" _ variable:Identifier _ ":" _ varType:(Type / ArrayType) _ "=" _ start:Expression _ ".." _ end:Expression _ ")" _ ":" _ body:Statement+ "end" _ {
+      return ForStatement(variable, varType, start, end, body);
+    }
+    / "for" _ "(" _ variable:Identifier _ ":=" _ start:Expression _ ".." _ end:Expression _ ")" body:BraceBlock {
+      return ForStatement(variable, null, start, end, body);
+    }
+    / "for" _ "(" _ variable:Identifier _ ":" _ varType:(Type / ArrayType) _ "=" _ start:Expression _ ".." _ end:Expression _ ")" body:BraceBlock {
       return ForStatement(variable, varType, start, end, body);
     }
     
@@ -386,6 +406,21 @@ FunctionDeclaration
         body,
         [...preEffects, ...postEffects]
       );
+    }
+  / name:Identifier preEffects:EffectSpecifier* _ "(" _ parameters:ParameterList? _ ")" _? postEffects:EffectSpecifier* _
+    ":" _ returnType:(Type / ArrayType) _ "=" body:BraceBlock {
+      return FunctionDeclaration(
+        name,
+        parameters || [],
+        returnType,
+        body,
+        [...preEffects, ...postEffects]
+      );
+    }
+
+BraceBlock
+  = _ "{" _ body:Statement+ "}" _ {
+      return BraceBlock(body);
     }
 
 EffectSpecifier
