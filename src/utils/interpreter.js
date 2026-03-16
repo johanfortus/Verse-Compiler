@@ -4,6 +4,8 @@
 // PEG.js generates parser.js, and given code input, constructs an AST following the defined grammar rules.
 // The AST is then used by this interpreter to execute the program logic.
 
+import { getImportedSymbols } from './verseLibraries.js';
+
 export class VerseInterpreter {
 	constructor() {
 		this.output = '';
@@ -14,11 +16,6 @@ export class VerseInterpreter {
 		this.returnValue = null;
 		this.returnEncountered = false;
 		this.lastExpressionValue = null;
-
-		this.symbolTable.set('creative_device', {
-			type: 'NativeClass',
-			name: 'creative_device',
-		});
 	}
 
 	interpret(ast) {
@@ -29,9 +26,21 @@ export class VerseInterpreter {
 			throw new Error('Invalid AST structure: Expected an object with a body array');
 		}
 
+		this.loadImportedLibraries(ast);
 		this.registerProgram(ast);
 		this.runDeviceEntrypoints();
 		return this.output;
+	}
+
+	loadImportedLibraries(program) {
+		const importPaths = program.body
+			.filter(statement => statement.type === 'UsingDeclaration')
+			.map(statement => statement.path);
+		const importedSymbols = getImportedSymbols(importPaths);
+
+		for (const [symbolName, symbol] of importedSymbols.entries()) {
+			this.symbolTable.set(symbolName, symbol);
+		}
 	}
 
 	registerProgram(program) {
