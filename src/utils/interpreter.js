@@ -28,15 +28,26 @@ export class VerseInterpreter {
 			throw new Error('Invalid AST structure: Expected an object with a body array');
 		}
 
-		this.visitProgram(ast);
+		this.registerProgram(ast);
 		this.runDeviceEntrypoints();
 		return this.output;
 	}
 
-	visitProgram(program) {
+	registerProgram(program) {
 		for (const statement of program.body) {
-			this.visitStatement(statement);
+			if (this.isDeclarationStatement(statement)) {
+				this.visitStatement(statement);
+			}
 		}
+	}
+
+	isDeclarationStatement(statement) {
+		return [
+			'FunctionDeclaration',
+			'VariableDeclaration',
+			'ConstDeclaration',
+			'ClassDefinition',
+		].includes(statement.type);
 	}
 
 	runDeviceEntrypoints() {
