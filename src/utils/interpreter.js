@@ -10,6 +10,7 @@ export class VerseInterpreter {
 		this.symbolTable = new Map();
 		this.breakEncountered = false;
 		this.functionTable = new Map();
+		this.currentMethodTable = null;
 		this.returnValue = null;
 		this.returnEncountered = false;
 		this.lastExpressionValue = null;
@@ -64,7 +65,13 @@ export class VerseInterpreter {
 				continue;
 			}
 
-			this.invokeStoredFunction(onBeginMethod, []);
+			const methodTable = new Map(
+				symbol.members
+					.filter(member => member.type === 'FunctionDeclaration')
+					.map(member => [member.name.name, member])
+			);
+
+			this.invokeStoredFunction(onBeginMethod, [], methodTable);
 		}
 	}
 
@@ -447,6 +454,11 @@ export class VerseInterpreter {
 		const args = functionCall.arguments.map(arg => this.evaluateExpression(arg));
 
 		if (!this.functionTable.has(functionName)) {
+			if (this.currentMethodTable?.has(functionName)) {
+				const methodDef = this.currentMethodTable.get(functionName);
+				return this.invokeStoredFunction(methodDef, args, this.currentMethodTable);
+			}
+
 			const symbol = this.symbolTable.get(functionName);
 			if (symbol && Array.isArray(symbol.value)) {
 				if (args.length !== 1) {
@@ -472,7 +484,7 @@ export class VerseInterpreter {
 		return this.invokeStoredFunction(functionDef, args);
 	}
 
-	invokeStoredFunction(functionDef, args) {
+	invokeStoredFunction(functionDef, args, methodTable = this.currentMethodTable) {
 		const functionName = functionDef.name.name;
 
 		if (args.length !== functionDef.parameters.length) {
@@ -483,7 +495,9 @@ export class VerseInterpreter {
 		this.returnEncountered = false;
 		this.returnValue = null;
 		const originalLastExpressionValue = this.lastExpressionValue;
+		const originalMethodTable = this.currentMethodTable;
 		this.lastExpressionValue = null;
+		this.currentMethodTable = methodTable;
 
 		try {
 			for (let i = 0; i < functionDef.parameters.length; i++) {
@@ -519,6 +533,7 @@ export class VerseInterpreter {
 			this.returnEncountered = false;
 			this.returnValue = null;
 			this.lastExpressionValue = originalLastExpressionValue;
+			this.currentMethodTable = originalMethodTable;
 		}
 	}
 
