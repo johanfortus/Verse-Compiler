@@ -15,7 +15,7 @@ const CodeEditor = ({ code, setCode, handleEditorMount, runCode }) => {
         <div className='editor-header'>
 
             <div className='file-name'>
-                test_device.verse
+                hello_world_device.verse
             </div>
 
             <div className='button-container'>
