@@ -71,7 +71,30 @@ export class VerseInterpreter {
 					.map(member => [member.name.name, member])
 			);
 
-			this.invokeStoredFunction(onBeginMethod, [], methodTable);
+			const instanceScope = this.buildClassInstanceScope(symbol, methodTable);
+			this.invokeStoredFunction(onBeginMethod, [], methodTable, instanceScope);
+		}
+	}
+
+	buildClassInstanceScope(classSymbol, methodTable) {
+		const originalSymbolTable = this.symbolTable;
+		const originalMethodTable = this.currentMethodTable;
+		const instanceScope = new Map(this.symbolTable);
+
+		this.symbolTable = instanceScope;
+		this.currentMethodTable = methodTable;
+
+		try {
+			for (const member of classSymbol.members) {
+				if (member.type === 'VariableDeclaration' || member.type === 'ConstDeclaration') {
+					this.visitStatement(member);
+				}
+			}
+
+			return new Map(this.symbolTable);
+		} finally {
+			this.symbolTable = originalSymbolTable;
+			this.currentMethodTable = originalMethodTable;
 		}
 	}
 
@@ -194,7 +217,9 @@ export class VerseInterpreter {
 
 	visitPrintStatement(printStatement) {
 		try {
-			const value = this.evaluateInterpolatedString(printStatement.value);
+			const value = printStatement.value.type === 'InterpolatedString'
+				? this.evaluateInterpolatedString(printStatement.value)
+				: String(this.evaluateExpression(printStatement.value));
 			console.log('Evaluated Print Statement:', value);
 			this.output += value + '\n';
 		}
@@ -484,20 +509,21 @@ export class VerseInterpreter {
 		return this.invokeStoredFunction(functionDef, args);
 	}
 
-	invokeStoredFunction(functionDef, args, methodTable = this.currentMethodTable) {
+	invokeStoredFunction(functionDef, args, methodTable = this.currentMethodTable, baseScope = this.symbolTable) {
 		const functionName = functionDef.name.name;
 
 		if (args.length !== functionDef.parameters.length) {
 			throw new Error(`Function '${functionName}' expects ${functionDef.parameters.length} arguments, but ${args.length} were provided`);
 		}
 
-		const originalSymbolTable = new Map(this.symbolTable);
+		const originalSymbolTable = this.symbolTable;
 		this.returnEncountered = false;
 		this.returnValue = null;
 		const originalLastExpressionValue = this.lastExpressionValue;
 		const originalMethodTable = this.currentMethodTable;
 		this.lastExpressionValue = null;
 		this.currentMethodTable = methodTable;
+		this.symbolTable = new Map(baseScope);
 
 		try {
 			for (let i = 0; i < functionDef.parameters.length; i++) {

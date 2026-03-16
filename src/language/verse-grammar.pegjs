@@ -157,7 +157,7 @@ SetStatement
 
 
 PrintStatement
-  = "Print" _ "(" _ value:InterpolatedString _ ")" _ {
+  = "Print" _ "(" _ value:(InterpolatedString / Expression) _ ")" _ {
       return PrintStatement(value);
     }
 
