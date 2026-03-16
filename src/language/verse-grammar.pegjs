@@ -12,6 +12,8 @@
 {
   
   function Program(body) { return { type: "Program", body: body }; }
+
+  function UsingDeclaration(path) { return { type: "UsingDeclaration", path: path }; }
   
   function VariableDeclaration(name, varType, value) { return { type: "VariableDeclaration", name: name, varType: varType, value: value }; }
 
@@ -89,7 +91,11 @@ Start
 
 // Defines the Program rule, which consists of multiple statements.
 Program
-  = _ statements:Statement* _ { return Program(statements); }
+  = _ statements:TopLevelStatement* _ { return Program(statements); }
+
+TopLevelStatement
+  = UsingDeclaration
+  / Statement
 
 // Defines a statement like variable declaration, set statements, loops, etc.
 Statement
@@ -106,6 +112,16 @@ Statement
   / ReturnStatement
   / FunctionCallStatement
   / ExpressionStatement
+
+UsingDeclaration
+  = "using" _ "{" _ path:ModulePath _ "}" _ {
+      return UsingDeclaration(path);
+    }
+
+ModulePath
+  = path:$("/" [a-zA-Z0-9._]+ ("/" [a-zA-Z0-9._]+)*) {
+      return path;
+    }
 
 Identifier
   = !ReservedKeyword h:[a-zA-Z_] t:[a-zA-Z0-9_]* {
@@ -127,6 +143,7 @@ ReservedKeyword
   / "return"
   / "set"
   / "true"
+  / "using"
   / "var"
 
 VariableDeclaration
