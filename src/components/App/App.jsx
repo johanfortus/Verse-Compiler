@@ -30,7 +30,7 @@ function App() {
 			setOutput(result);
 		}
 		catch (e) {
-			setOutput(`Parse error: ${e.message}`);
+			setOutput(`Compile error: ${e.message}`);
 		}
 	};
 

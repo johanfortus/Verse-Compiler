@@ -23,7 +23,7 @@ export function registerVerseLanguage(monaco) {
 		// Keywords
 		keywords: [
 			'function', 'var', 'let', 'if', 'else', 'for', 'return', 'Print',
-			'decides', 'transacts', 'override', 'suspends'
+			'decides', 'transacts', 'override', 'suspends', 'using'
 		],
 		typeKeywords: [
 			'string', 'number', 'boolean', 'void'
