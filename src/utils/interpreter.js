@@ -364,6 +364,11 @@ export class VerseInterpreter {
 							newValue = currentValue + value;
 							break;
 						}
+						case '-=': {
+							const currentValue = entry.value;
+							newValue = currentValue - value;
+							break;
+						}
 						default:
 							throw new Error(`Unsupported assignment operator: ${setStatement.operator}`);
 					}

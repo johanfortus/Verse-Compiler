@@ -338,7 +338,7 @@ UnaryOperator
 
 
 AssignmentOperator
-  = "=" / "+=" {
+  = "=" / "+=" / "-=" {
       console.log("Captured AssignmentOperator:", text());
       return text();
   }
