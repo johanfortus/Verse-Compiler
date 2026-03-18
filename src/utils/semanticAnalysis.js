@@ -213,6 +213,44 @@ function analyzeSetStatement(statement, scope) {
 	}
 
 	analyzeExpression(statement.value, scope);
+	ensureValidAssignmentOperatorUsage(statement, scope);
+}
+
+function ensureValidAssignmentOperatorUsage(statement, scope) {
+	if (statement.name.type !== 'Identifier') {
+		return;
+	}
+
+	const targetType = scope.lookup(statement.name.name)?.verseType || null;
+	const valueType = resolveExpressionType(statement.value, scope);
+
+	switch (statement.operator) {
+		case '+=':
+		case '-=':
+		case '*=':
+			ensureNumericCompoundAssignment(statement.operator, targetType, valueType);
+			return;
+		case '/=':
+			if (targetType?.kind !== 'primitive' || targetType.name !== 'float') {
+				throw new SemanticError("The '/=' operator is only supported for float variables.");
+			}
+			ensureNumericCompoundAssignment(statement.operator, targetType, valueType);
+			return;
+		default:
+			return;
+	}
+}
+
+function ensureNumericCompoundAssignment(operator, targetType, valueType) {
+	if (isNumericPrimitiveType(targetType) && isNumericPrimitiveType(valueType)) {
+		return;
+	}
+
+	throw new SemanticError(`The '${operator}' operator is only supported for int and float values.`);
+}
+
+function isNumericPrimitiveType(verseType) {
+	return verseType?.kind === 'primitive' && ['int', 'float'].includes(verseType.name);
 }
 
 function analyzeExpression(expression, scope, options = {}) {
